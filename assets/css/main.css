@@ -1,0 +1,123 @@
+:root {
+  --font-family: "Orkney", Poppins, sans-serif;
+
+  --p-red: #dc3035;
+  --p-blue: #243459;
+  --p-gold: #d7b448;
+  --p-black: #001e3c;
+
+  --o-yellow: #f9c349;
+  --o-orange: #ffb100;
+  --o-black: #1e1810;
+  --o-gray: #62615c;
+
+  --blue-oktb: #263359;
+  --blue-oktb: #161f38;
+
+  --okfc-blue: #263359;
+  --okfc-dark-blue: #161f38;
+  --okfc-gold: #ffb100;
+  --okfc-dark-blue: #161f38;
+  --okfc-yellow: #f9c349;
+}
+
+html {
+  font-size: 16px;
+}
+
+body {
+  font-family: var(--font-family);
+  margin: 0;
+}
+
+*:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.b-text-red {
+  color: var(--p-red) !important;
+}
+.b-text-primary {
+  color: var(--p-black) !important;
+}
+.b-text-gold {
+  color: var(--p-gold) !important;
+}
+.b-text-yellow {
+  color: var(--o-yellow) !important;
+}
+
+.bg-gold {
+  background-color: var(--okfc-gold) !important;
+}
+
+.bg-yellow {
+  background-color: var(--o-yellow) !important;
+}
+
+.bg-blue {
+  background-color: var(--okfc-blue) !important;
+}
+
+.bg-blue-dark {
+  background-color: var(--okfc-dark-blue) !important;
+}
+
+.b-text-blue {
+  color: var(--okfc-blue);
+}
+.b-text-blue-bark {
+  color: var(--okfc-dark-blue);
+}
+
+.border-blue {
+  border-color: var(--okfc-blue) !important;
+}
+
+.border-blue-dark {
+  border-color: var(--okfc-dark-blue) !important;
+}
+
+.border-gold {
+  border-color: var(--okfc-gold) !important;
+}
+
+.border-yellow {
+  border-color: var(--o-yellow) !important;
+}
+
+
+.container {
+  width: 100%;
+  max-width: 1140px;
+  margin: 0;
+  padding: 0;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 0 12px;
+  display: flex;
+  flex-basis: auto !important;
+  flex-direction: column;
+  flex-shrink: 1 !important;
+  flex-wrap: nowrap;
+  flex-grow: 0 !important;
+  column-gap: 20px;
+  row-gap: 20px;
+}
+
+.container-fluid {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 0 12px;
+  flex-basis: auto;
+  flex-direction: row;
+  flex-shrink: 1;
+  flex-wrap: nowrap;
+  flex-grow: 1;
+  column-gap: 20px;
+  row-gap: 20px;
+}
