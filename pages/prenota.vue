@@ -451,7 +451,7 @@ function handleExpiration() {
                                 <div class="flex align-items-center justify-content-start py-2">
                                     Ti stai associando alla prenotazione per &nbsp;<b>{{
                                         _associationData?.event_date
-                                    }},
+                                        }},
                                         {{
                                             _associationData?.timeslot }} – {{ _associationData?.area_name }}</b>&nbsp;
                                     di&nbsp;
@@ -464,7 +464,7 @@ function handleExpiration() {
                             <div v-if="!_isAssociated"
                                 class="p-card p-component border-round-2xl p-3 shadow-none border-1 surface-border shadow-1">
                                 <div class="flex align-items-center justify-content-start py-2">
-                                    <div class="w-3"><i class="pi pi-calendar mr-1"></i> Data</div>
+                                    <div class="w-3 white-space-nowrap"><i class="pi pi-calendar mr-1"></i> Data</div>
                                     <div class="flex gap-3 font-medium text-lg">
                                         {{ _computedSelectedEvent?.formatted_date }}
                                     </div>
@@ -475,12 +475,19 @@ function handleExpiration() {
                             <div v-if="!_isAssociated"
                                 class="p-card p-component border-round-2xl p-3 shadow-none border-1 surface-border  shadow-1">
                                 <div class="flex align-items-center justify-content-start">
-                                    <div class="w-3"><i class="pi pi-clock mr-1"></i> Orario</div>
-                                    <div class="flex gap-3">
-                                        <div v-for="(ts, index) in _availableTimeslots" :key="index">
-                                            <Button :label="ts.name" @click="_selectedTimeslotId = ts.id"
-                                                :outlined="_selectedTimeslotId !== ts.id" />
+                                    <div class="w-3 white-space-nowrap"><i class="pi pi-clock mr-1"></i> Orario</div>
+                                    <div>
+                                        <div class="flex gap-3">
+                                            <div v-for="(ts, index) in _availableTimeslots" :key="index">
+                                                <Button :label="ts.name" @click="_selectedTimeslotId = ts.id"
+                                                    :outlined="_selectedTimeslotId !== ts.id" />
+                                            </div>
                                         </div>
+                                        <div class="text-sm py-2 -mb-3 text-500">Gli orari hanno il solo scopo di
+                                            regolare i
+                                            flussi di
+                                            accesso. Il posto si
+                                            considera prenotato per l’intera durata della serata</div>
                                     </div>
                                 </div>
                             </div>
