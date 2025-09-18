@@ -451,7 +451,7 @@ function handleExpiration() {
                                 <div class="flex align-items-center justify-content-start py-2">
                                     Ti stai associando alla prenotazione per &nbsp;<b>{{
                                         _associationData?.event_date
-                                        }},
+                                    }},
                                         {{
                                             _associationData?.timeslot }} – {{ _associationData?.area_name }}</b>&nbsp;
                                     di&nbsp;
@@ -592,7 +592,7 @@ function handleExpiration() {
                                     <div class="flex gap-3 w-full">
                                         <BookingHorizontalPeoplePicker v-model:adults="_adultsCount"
                                             v-model:children="_childredCount" v-model:infants="_infantsCount"
-                                            :maxInfants="_maxInfants" :disableInputs="true" class="w-full" />
+                                            :maxInfants="_maxInfants" :hide-children="true" class="w-full" />
                                         <!-- <BookingSeatPicker /> -->
                                     </div>
                                 </div>

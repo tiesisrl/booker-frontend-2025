@@ -6,6 +6,7 @@ const MAX_LIMIT = 64;
 interface Props {
   disableInfants?: boolean;
   hideInfants?: boolean;
+  hideChildren?: boolean;
   max?: number | null;
   disabled?: boolean;
   disableInputs?: boolean;
@@ -60,8 +61,8 @@ const label = computed(() => {
   <div class="formgrid grid pt-2">
     <div class="field col-12 md:col-4 flex flex-column gap-0 align-items-center justify-content-start">
       <label for="date" class="select-none">
-        Adulti
-        <span class="text-sm text-500">da 18 anni in su</span>
+        Adulti e bambini
+        <span class="text-sm text-500">dai 6 anni in su</span>
       </label>
       <InputNumber v-model="adults" :min="1" :max="299" showButtons buttonLayout="horizontal" size="small"
         inputClass="border-round-lg text-center mx-1 w-3rem p-0 outline-none border-0 text-black-alpha-90 opacity-100 select-none text-xl"
@@ -74,7 +75,8 @@ const label = computed(() => {
         }" />
     </div>
 
-    <div class="field col-12 md:col-4 flex flex-column gap-0 align-items-center justify-content-start">
+    <div v-if="!hideChildren"
+      class="field col-12 md:col-4 flex flex-column gap-0 align-items-center justify-content-start">
       <label for="date" class="select-none">
         Bambini
         <span class="text-sm text-500">da 3 a 17 anni</span>
@@ -94,8 +96,8 @@ const label = computed(() => {
     <div v-if="!hideInfants"
       class="field col-12 md:col-4 flex flex-column gap-0 align-items-center justify-content-start">
       <label for="date" class="select-none">
-        Neonati
-        <span class="text-sm text-500 pl-1">fino a 3 anni</span> – <span class="text-green-400">gratis</span>
+        Bambini piccoli
+        <span class="text-sm text-500 pl-1">fino a 5 anni</span> – <span class="text-green-400">gratis</span>
       </label>
       <InputNumber v-model="infants" :min="0" :max="maxInfants" showButtons buttonLayout="horizontal" size="small"
         inputClass="border-round-lg text-center mx-1 w-3rem p-0 outline-none border-0 text-black-alpha-90 opacity-100 select-none text-xl"
