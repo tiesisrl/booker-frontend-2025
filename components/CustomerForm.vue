@@ -292,7 +292,7 @@ defineExpose({
           <label for="business_vat">
             P. IVA o Codice fiscale<span class="b-text-red">*</span>
           </label>
-          <InputText v-model="business_vat" id="business_vat" placeholder="es: Google SRL" required
+          <InputText v-model="business_vat" id="business_vat" placeholder="es: 12345678901" required
             aria-describedby="business_vat-help" :class="{ 'p-invalid': errors.business_vat }" :disabled="loading" />
           <small id="business_vat-help" class="p-error">
             {{ errors.business_vat }}
