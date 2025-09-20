@@ -30,7 +30,8 @@ import RadioButton from 'primevue/radiobutton';
 import OverlayPanel from 'primevue/overlaypanel';
 import DataView from 'primevue/dataview';
 import DataViewLayoutOptions from 'primevue/dataviewlayoutoptions'   // optional
-
+import BlockUI from 'primevue/blockui';
+import InlineMessage from 'primevue/inlinemessage';
 
 export default defineNuxtPlugin((nuxtApp) => {
   nuxtApp.vueApp.use(PrimeVue, { ripple: true });
@@ -65,4 +66,6 @@ export default defineNuxtPlugin((nuxtApp) => {
   nuxtApp.vueApp.component("OverlayPanel", OverlayPanel);
   nuxtApp.vueApp.component("DataView", DataView);
   nuxtApp.vueApp.component("DataViewLayoutOptions", DataViewLayoutOptions);
+  nuxtApp.vueApp.component("BlockUI", BlockUI);
+  nuxtApp.vueApp.component("InlineMessage", InlineMessage);
 });

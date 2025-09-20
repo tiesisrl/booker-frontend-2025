@@ -58,7 +58,7 @@ onBeforeUnmount(() => {
 
     <div class="footer text-sm text-center py-2">
       <footer>
-        {{ new Date().getFullYear() }} 2024 All Rights Reserved ALIWEST SRL®
+        {{ new Date().getFullYear() }} All Rights Reserved ALIWEST SRL®
         P.I. 03679190789
         <div class="text-xs text-center pt-1">
           <a href="https://www.oktoberfestcalabria.com/dichiarazione-sulla-privacy-ue/" target="_blank">Privacy

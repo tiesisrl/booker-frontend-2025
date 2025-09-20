@@ -34,6 +34,11 @@ const _computedTotalGuests = computed(() => _adultsCount.value + _childredCount.
 const _computedPayingGuests = computed(() => _adultsCount.value + _childredCount.value);
 const _computedTotalAmount = computed(() => _computedSelectedProduct.value?.price * _computedPayingGuests.value);
 
+const _computedAvailableSeats = computed(() => {
+    if (!_computedSelectedOption.value) return 0;
+    return _computedSelectedOption.value.available_pax;
+});
+
 const _maxInfants = computed(
     () => Math.ceil(_computedPayingGuests.value / 8) * 2
 );
@@ -45,6 +50,7 @@ const sessionExpiredDialog = ref(false);
 
 const customerFormRef = ref(null);
 const cartData = ref<any | null>(null);
+
 
 
 const {
@@ -443,7 +449,7 @@ function handleExpiration() {
                     <template #content="{ prevCallback, nextCallback }">
                         <div>
                             <Button icon="pi pi-angle-left" label="Torna alla selezione delle date" link
-                                @click="(e) => { _selectedEventId = null; prevCallback(e); }" />
+                                @click="(e) => { _selectedEventId = null; handleAssociationCancel(); prevCallback(e); }" />
                         </div>
                         <div class="flex flex-column gap-1">
                             <div v-if="_isAssociated"
@@ -451,7 +457,7 @@ function handleExpiration() {
                                 <div class="flex align-items-center justify-content-start py-2">
                                     Ti stai associando alla prenotazione per &nbsp;<b>{{
                                         _associationData?.event_date
-                                    }},
+                                        }},
                                         {{
                                             _associationData?.timeslot }} – {{ _associationData?.area_name }}</b>&nbsp;
                                     di&nbsp;
@@ -499,53 +505,68 @@ function handleExpiration() {
                                 <BookingSeatingPlanImage />
                                 <div class="flex flex-column md:flex-row gap-3">
                                     <div v-for="(item, index) in _availableOptions" :key="index"
-                                        class="md:w-6 w-full p-card p-component border-1 surface-border"
+                                        class="md:w-6 w-full p-card p-component border-1 surface-border relative"
                                         :class="`${_selectedOptionId === item?.id ? 'shadow-3 bg-gray-200' : 'shadow-none'}`">
-                                        <div class="flex flex-column sm:align-items-center p-4 gap-3 w-full">
+                                        <div v-if="item.available_pax === 0"
+                                            class="absolute text-red bottom-0	 font-bold -mt-2 w-full"
+                                            style="z-index: 1200 !important;">
+                                            <div
+                                                class="mx-auto border-round-sm p-3 text-red-600 bg-white-alpha-90 text-center text-4xl py-4 select-none	">
+                                                SOLD
+                                                OUT</div>
+                                        </div>
+                                        <BlockUI :blocked="item.available_pax === 0">
+                                            <div class="flex flex-column sm:align-items-center p-4 gap-3 w-full">
 
-                                            <div class="text-lg uppercase text-500 text-center">
-                                                {{ item.type_display }}
-                                            </div>
-                                            <div class="font-medium text-3xl uppercase text-900 text-center">
-                                                {{ item.section_display }}
-                                            </div>
-                                            <div class="flex flex-column gap-3 pt-4 text-center">
-                                                <div class="text-center">
-                                                    <span class="pi pi-user mr-1"></span> Posto a sedere riservato
+                                                <div class="text-lg uppercase text-500 text-center">
+                                                    {{ item.type_display }}
                                                 </div>
-                                                <div class="font-medium text-center">
-                                                    <span class="pi pi-bolt mr-1"></span> Ingresso prioritario
+                                                <div class="font-medium text-3xl uppercase text-900 text-center">
+                                                    {{ item.section_display }}
                                                 </div>
-                                                <div class="text-center pt-5">
-                                                    <span class="pi pi-euro mr-1"></span> Valore
-                                                    spendibile<span class="text-red-500">*</span>
-                                                    <!-- <div v-html="item?.min_consumption?.description_html" /> -->
+                                                <div class="flex flex-column gap-3 pt-4 text-center">
+                                                    <div class="text-center">
+                                                        <span class="pi pi-user mr-1"></span> Posto a sedere riservato
+                                                    </div>
+                                                    <div class="font-medium text-center">
+                                                        <span class="pi pi-bolt mr-1"></span> Ingresso prioritario
+                                                    </div>
+                                                    <div class="text-center pt-5">
+                                                        <span class="pi pi-euro mr-1"></span> Valore
+                                                        spendibile<span class="text-red-500">*</span>
+                                                        <!-- <div v-html="item?.min_consumption?.description_html" /> -->
+                                                    </div>
                                                 </div>
-                                            </div>
-                                            <div class="text-center pt-1">
-                                                <div class="text-6xl font-medium text-900 text-center">
-                                                    € {{ item?.min_consumption?.price * 1 }}
+                                                <div class="text-center pt-1">
+                                                    <div class="text-6xl font-medium text-900 text-center">
+                                                        € {{ item?.min_consumption?.price * 1 }}
+                                                    </div>
+                                                    <div class="text-sm text-500 -mt-1">
+                                                        +{{ item.fees_amount * 1 }}€ di commissioni
+                                                    </div>
+                                                    <div class="text-sm text-700 block mt-1 text-center">a
+                                                        persona
+                                                    </div>
                                                 </div>
-                                                <div class="text-sm text-500 -mt-1">
-                                                    +{{ item.fees_amount * 1 }}€ di commissioni
-                                                </div>
-                                                <div class="text-sm text-700 block mt-1 text-center">a
-                                                    persona
-                                                </div>
-                                            </div>
-                                            <div class="text-center-4rem mt-4" v-if="!_isAssociated">
-                                                <!-- <RadioButton v-model="_selectedOptionId" inputId="option" name="option"
+                                                <div class="text-center-4rem mt-4" v-if="!_isAssociated">
+                                                    <!-- <RadioButton v-model="_selectedOptionId" inputId="option" name="option"
                                                     active :value="item?.id" @click="() => {
                                                         _selectedOptionId = item?.id;
                                                         _selectedProductId = item?.min_consumption?.id;
                                                     }" /> -->
-                                                <Button label="Seleziona" size="large" class="w-full md:w-auto"
-                                                    :outlined="_selectedOptionId !== item?.id" @click="() => {
-                                                        _selectedOptionId = item?.id;
-                                                        _selectedProductId = item?.min_consumption?.id;
-                                                    }" />
+                                                    <Button label="Seleziona" size="large" class="w-full md:w-auto"
+                                                        :outlined="_selectedOptionId !== item?.id" @click="() => {
+                                                            _selectedOptionId = item?.id;
+                                                            _selectedProductId = item?.min_consumption?.id;
+                                                        }" :disabled="item.available_pax === 0" />
+                                                </div>
+                                                <div v-if="item.available_pax <= 100 && item.available_pax > 0" class="text-center -mb-2 mt-2 text-red-500
+ font-bold">
+                                                    <i class="pi pi-exclamation-circle"></i>
+                                                    Ancora pochi posti!
+                                                </div>
                                             </div>
-                                        </div>
+                                        </BlockUI>
                                     </div>
                                 </div>
                                 <!-- <div class="grid grid-nogutter">
@@ -583,40 +604,61 @@ function handleExpiration() {
                             </div>
 
                             <!-- Persone -->
-                            <div class="p-card p-component border-round-2xl p-3 shadow-none border-1 surface-border shadow-1"
-                                v-if="_selectedOptionId">
-                                <div class="flex flex-column md:flex-row align-items-center justify-content-start">
-                                    <div class="md:w-3 w-full md:text-left text-center p-2 md:p-0 white-space-nowrap">
-                                        <i class="pi pi-users mr-1"></i>In quanti siete?
-                                    </div>
-                                    <div class="flex gap-3 w-full">
-                                        <BookingHorizontalPeoplePicker v-model:adults="_adultsCount"
-                                            v-model:children="_childredCount" v-model:infants="_infantsCount"
-                                            :maxInfants="_maxInfants" :hide-children="true" class="w-full" />
-                                        <!-- <BookingSeatPicker /> -->
+                            <template v-if="_isAssociated && _computedSelectedOption && _computedAvailableSeats <= 0">
+                                <div
+                                    class="p-card p-component border-round-2xl p-3 shadow-none border-1 surface-border shadow-1">
+                                    <div class="text-red-600 text-xl font-bold text-center">
+                                        <i class="pi pi-exclamation-triangle mr-2"></i>
+                                        Non ci sono più posti disponibili per l'area selezionata.
                                     </div>
                                 </div>
-                            </div>
-                            <div class="flex justify-content-start mt-2 px-2 pb-2" v-if="_availableOptions.length > 0">
-                                <div class="text-sm text-500">
-                                    <span class="text-red-500">*</span>
-                                    Il prezzo indicato è il valore minimo di consumo per ogni persona. I coupon valore
-                                    sono spendibili per food, beverage (esclusi bretzel) e gadgets. Eventuale credito
-                                    residuo potrà essere speso in altre date dell’evento, ma non garantisce accesso né
-                                    posto a sedere.
+                            </template>
+                            <template v-else>
+                                <div class="p-card p-component border-round-2xl p-3 shadow-none border-1 surface-border shadow-1"
+                                    v-if="_selectedOptionId">
+                                    <div class="flex flex-column md:flex-row align-items-center justify-content-start">
+                                        <div
+                                            class="md:w-3 w-full md:text-left text-center p-2 md:p-0 white-space-nowrap">
+                                            <i class="pi pi-users mr-1"></i>In quanti siete?
+                                        </div>
+                                        <div class="flex gap-3 w-full">
+                                            <BookingHorizontalPeoplePicker v-model:adults="_adultsCount"
+                                                v-model:children="_childredCount" v-model:infants="_infantsCount"
+                                                :maxInfants="_maxInfants" :hide-children="true"
+                                                :max="_computedAvailableSeats" class="w-full" />
+                                            <!-- <BookingSeatPicker /> -->
+                                        </div>
+                                    </div>
+                                    <Message severity="error"
+                                        v-if="_computedSelectedOption && (_computedTotalGuests > _computedAvailableSeats)">
+                                        Hai
+                                        superato il numero di posti di disponibili per l'area
+                                        selezionata. Riduci il numero di persone per proseguire.</Message>
                                 </div>
-                            </div>
-
-                            <!-- Actions -->
-                            <div class="pt-4" v-if="_selectedOptionId">
-                                <div class="flex align-items-center justify-content-end">
-                                    <Button :disabled="loading || !_computedSelectedProduct || _computedTotalGuests < 1"
-                                        :loading="loading" :pt="{ label: { class: 'font-normal text-xl' } }"
-                                        :label="_buttonLabel" @click="() => addToCart(nextCallback)"
-                                        class="w-full md:w-auto" />
+                                <div class="flex justify-content-start mt-2 px-2 pb-2"
+                                    v-if="_availableOptions.length > 0">
+                                    <div class="text-sm text-500">
+                                        <span class="text-red-500">*</span>
+                                        Il prezzo indicato è il valore minimo di consumo per ogni persona. I coupon
+                                        valore
+                                        sono spendibili per food, beverage (esclusi bretzel) e gadgets. Eventuale
+                                        credito
+                                        residuo potrà essere speso in altre date dell’evento, ma non garantisce accesso
+                                        né
+                                        posto a sedere.
+                                    </div>
                                 </div>
-                            </div>
-
+                                <!-- Actions -->
+                                <div class="pt-4" v-if="_selectedOptionId">
+                                    <div class="flex align-items-center justify-content-end">
+                                        <Button
+                                            :disabled="loading || !_computedSelectedProduct || _computedTotalGuests < 1 || _computedTotalGuests > _computedAvailableSeats"
+                                            :loading="loading" :pt="{ label: { class: 'font-normal text-xl' } }"
+                                            :label="_buttonLabel" @click="() => addToCart(nextCallback)"
+                                            class="w-full md:w-auto" />
+                                    </div>
+                                </div>
+                            </template>
                         </div>
                     </template>
                 </StepperPanel>
