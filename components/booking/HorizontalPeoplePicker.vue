@@ -64,7 +64,7 @@ const label = computed(() => {
         Adulti e bambini
         <span class="text-sm text-500">dai 6 anni in su</span>
       </label>
-      <InputNumber v-model="adults" :min="1" :max="299" showButtons buttonLayout="horizontal" size="small"
+      <InputNumber v-model="adults" :min="1" :max="96" showButtons buttonLayout="horizontal" size="small"
         inputClass="border-round-lg text-center mx-1 w-3rem p-0 outline-none border-0 text-black-alpha-90 opacity-100 select-none text-xl"
         :inputProps="{ disabled: disableInputs }" incrementButtonIcon="pi pi-plus" decrementButtonIcon="pi pi-minus"
         decrementButtonClass="border-circle w-2rem h-2rem my-auto disable-dbl-tap-zoom"
@@ -81,7 +81,7 @@ const label = computed(() => {
         Bambini
         <span class="text-sm text-500">da 3 a 17 anni</span>
       </label>
-      <InputNumber v-model="children" :min="0" :max="299" showButtons buttonLayout="horizontal" size="small"
+      <InputNumber v-model="children" :min="0" :max="96" showButtons buttonLayout="horizontal" size="small"
         :inputProps="{ disabled: disableInputs }"
         inputClass="border-round-lg text-center mx-1 w-3rem p-0 outline-none border-0 text-black-alpha-90 opacity-100 select-none text-xl"
         incrementButtonIcon="pi pi-plus" decrementButtonIcon="pi pi-minus"
