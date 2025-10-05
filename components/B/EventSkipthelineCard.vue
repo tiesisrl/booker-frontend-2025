@@ -9,7 +9,7 @@ defineEmits(['clicked', 'submit'])
 const props = withDefaults(defineProps<Props>(), {
     disabled: false,
     list: false,
-    buttonLabel: "Prenota"
+    buttonLabel: "Salta la fila"
 });
 const imageUrl = ref("https://oktoberfestcalabria.com/wp-content/uploads/elementor/thumbs/tendone-paulaner-oktoberfest.jpg-2-pu3ae2bqeoqa05wvbv8j40sua0crlgkk8gye9zmu8o.webp")
 
@@ -42,7 +42,7 @@ const imageUrl = ref("https://oktoberfestcalabria.com/wp-content/uploads/element
                 <div class="flex flex-row align-items-end gap-5 h-7rem">
                     <Button icon="pi pi-shopping-cartx" :label="buttonLabel" size="large"
                         class="align-self-end w-full md:w-auto" @click="$emit('clicked')"
-                        :disabled="!event.booking_enable"></Button>
+                        :disabled="!(event.is_active && event.skiptheline_enable && event.skiptheline_is_available)"></Button>
                 </div>
             </div>
         </div>

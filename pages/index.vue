@@ -22,7 +22,7 @@ const router = useRouter();
         <div class="font-bold mt-5" style="min-height: 80px">
           BIGLIETTO SALTA FILA PER ENTRARE PRIMA NEL PALATENDA
         </div>
-        <Button label="Acquista ora" class="py-2" @click="router.push({ path: '/saltafila' })" size="large" disabled />
+        <Button label="Acquista ora" class="py-2" @click="router.push({ path: '/saltafila' })" size="large" />
       </div>
     </div>
   </div>
