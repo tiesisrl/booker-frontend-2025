@@ -6,7 +6,6 @@ const loading = ref(false);
 const active = ref(0);
 
 
-// const _availableEvents = ref([]); -> useFetch al primo acesso alla pagina
 const _availableTimeslots = ref<any[]>([]);
 const _availableOptions = ref<any[]>([]);
 const _availableProducts = ref<any[]>([]);
@@ -26,26 +25,15 @@ const _selectedProductId = ref(null);
 
 
 const _computedSelectedEvent = computed(() => _availableEvents.value?.find((o: any) => o.id === _selectedEventId.value));
-const _computedSelectedTimeslot = computed(() => _availableTimeslots.value?.find((o: any) => o.id === _selectedTimeslotId.value));
 const _computedSelectedOption = computed(() => _availableOptions.value?.find((o: any) => o.id === _selectedOptionId.value));
 const _computedSelectedProduct = computed(() => _computedSelectedOption.value?.min_consumption);
 
 const _computedTotalGuests = computed(() => _adultsCount.value + _childredCount.value + _infantsCount.value);
 const _computedPayingGuests = computed(() => _adultsCount.value + _childredCount.value);
 const _computedTotalAmount = computed(() => _computedSelectedProduct.value?.price * _computedPayingGuests.value);
-
-const _computedAvailableSeats = computed(() => {
-    if (!_computedSelectedOption.value) return 0;
-    return _computedSelectedOption.value.available_pax;
-});
-
-const _maxInfants = computed(
-    () => Math.ceil(_computedPayingGuests.value / 8) * 2
-);
+const _availableActiveEvents = computed(() => _availableEvents.value?.filter(e => !e.is_ended) ?? [])
 
 const discountCode = ref("");
-
-const showAssociateDialog = ref(false);
 const sessionExpiredDialog = ref(false);
 
 const customerFormRef = ref(null);
@@ -83,11 +71,10 @@ async function _getAvailableBookingOptions(eventId: any, timeslotId: any) {
 
     if (!eventId || !timeslotId) return;
 
-    const result = await $fetch("/api/v2/available-booking-options",
+    const result = await $fetch("/api/v2/available-skiptheline-options",
         {
             query: {
                 event: eventId,
-                timeslot: timeslotId,
             },
         }
     );
@@ -115,8 +102,6 @@ function reset() {
 
 watch(() => _selectedEventId.value, async (eventId, oldValue) => {
     /* Quando cambia l'evento selezionato recupero le fascie orarie disponibili */
-    // console.log("[CHANGED] _selectedEventId", eventId)
-    if (_isAssociated.value) return;
 
     reset();
     if (!eventId) return;
@@ -124,7 +109,7 @@ watch(() => _selectedEventId.value, async (eventId, oldValue) => {
 
     try {
         loading.value = true;
-        _availableTimeslots.value = await _getAvailableTimeslots(eventId) || [];
+        _availableOptions.value = await _getAvailableBookingOptions(_selectedEventId.value, eventId) || [];
     } catch (error) {
         console.error(error);
     } finally {
@@ -178,11 +163,12 @@ async function addToCart(cb: any) {
         cartData.value = cart;
         localStorage.setItem("CartID", cart?.id);
         cb();
-    } catch (e) {
+    } catch (error) {
         console.error(error);
         toast.add({
             severity: "error",
             detail:
+                error?.data?.data?.errors?.[0]?.detail ||
                 error?.data?.message ||
                 error?.message ||
                 "Ops! Qualcosa è andato storto! Riprova.",
@@ -332,33 +318,6 @@ async function removeDiscountCode() {
     }
 }
 
-async function _onJoinSuccess(data: any) {
-    _associationCode.value = data?.code;
-    _isAssociated.value = true;
-    _selectedEventId.value = data?.event_id;
-    _selectedTimeslotId.value = data?.timeslot_id;
-    _availableOptions.value = [data?.option];
-    _selectedOptionId.value = data?.option_id;
-    _selectedProductId.value = data?.option?.min_consumption?.id;
-    _associationData.value = data;
-    showAssociateDialog.value = false;
-
-    await nextTick(() => {
-        active.value = active.value + 1;
-    });
-}
-
-
-async function handleAssociationCancel() {
-    _associationCode.value = "";
-    _isAssociated.value = false;
-    _selectedEventId.value = null;
-
-    await nextTick(() => {
-        active.value = 0;
-    });
-}
-
 // Config components
 const bookTypeButtonPT = {
     root: {
@@ -370,10 +329,7 @@ const bookTypeButtonPT = {
 };
 
 const _buttonLabel = computed(() => {
-    let label = `Procedi ${_computedTotalGuests.value} person${_computedTotalGuests.value > 1 ? 'e' : 'a'}`
-    if (_computedTotalAmount.value > 0)
-        label += ` , € ${_computedTotalAmount.value}`
-    return label
+    return "Acquista"
 })
 
 function handleExpiration() {
@@ -388,19 +344,17 @@ function handleExpiration() {
 </script>
 
 <template>
-    <div id="booking-page" class="page page-content pb-3">
-        <!-- Intestazione-->
+    <div id="skiptheline-page" class="page page-content pb-3">
         <div ref="headerSectionRef" class="bg-blue-dark text-white">
             <div class="container header text-center pt-8 pb-4">
                 <h1 class="text-3xl md:text-5xl pb-0 mb-0 font-medium">
-                    <span class="b-text-yellow font-bold">PRENOTA</span> IL TUO TAVOLO
+                    <span class="b-text-yellow font-bold">SALTA</span> LA FILA
                 </h1>
                 <h3 class="text-base md:text-xl font-medium mt-2">
-                    Salta la coda e prenota il tuo posto all'Oktoberfest Calabria
+                    Salta la coda ed entra subito all'Oktoberfest Calabria
                 </h3>
             </div>
         </div>
-
         <Dialog v-model:visible="sessionExpiredDialog" modal :draggable="false" :closeOnEscape="false" :closable="false"
             :pt="{
                 root: 'border-none',
@@ -417,28 +371,13 @@ function handleExpiration() {
             </div>
         </Dialog>
 
-        <Dialog v-model:visible="showAssociateDialog" modal header="Associati ad una prenotazione"
-            :style="{ 'max-width': '600px' }">
-            <BookingAssociationCodeApply @success="_onJoinSuccess" @cancel="showAssociateDialog = false" />
-        </Dialog>
-
         <div class="container grid pt-6">
             <Stepper linear v-model:activeStep="active">
                 <StepperPanel #content="{ nextCallback }">
-                    <!-- Eventi -->
-                    <div class="grid">
-                        <div
-                            class="col text-center text-xl flex align-content-center align-items-center flex-wrap bg-yellow mb-4 border-round-lg p-4 gap-2">
-                            <i class="pi pi-user-plus ml-2 mr-3" style="font-size: 2.1rem"></i> <span class="pt-2">Hai
-                                uno
-                                codice associazione?</span>
-                            <Button label="Clicca qui" :pt="bookTypeButtonPT" @click="showAssociateDialog = true;" link
-                                class="p-1 text-xl mt-2" />
-                        </div>
-                    </div>
                     <div class="grid gap-2">
-                        <div v-for="(event, index) in _availableEvents" :key="index" class="w-full">
-                            <BEventCard :event="event" list @clicked="{
+                        <div v-for="(event, index) in _availableActiveEvents" :key="index" class="w-full">
+                            <!-- <pre>{{ event }}</pre> -->
+                            <BEventSkipthelineCard :event="event" list button-label="Salta la fila" @clicked="{
                                 _selectedEventId = event?.id;
                                 nextCallback(event);
                             }" />
@@ -447,65 +386,18 @@ function handleExpiration() {
                 </StepperPanel>
                 <StepperPanel>
                     <template #content="{ prevCallback, nextCallback }">
-                        <div>
-                            <Button icon="pi pi-angle-left" label="Torna alla selezione delle date" link
-                                @click="(e) => { _selectedEventId = null; handleAssociationCancel(); prevCallback(e); }" />
-                        </div>
                         <div class="flex flex-column gap-1">
-                            <div v-if="_isAssociated"
-                                class="p-card p-component border-round-2xl p-3 shadow-none border-0 bg-green-100 border-green-200">
-                                <div class="flex align-items-center justify-content-start py-2">
-                                    Ti stai associando alla prenotazione per &nbsp;<b>{{
-                                        _associationData?.event_date
-                                    }},
-                                        {{
-                                            _associationData?.timeslot }} – {{ _associationData?.area_name }}</b>&nbsp;
-                                    di&nbsp;
-                                    <i>"{{ _associationData?.display_name }}"</i>.
-                                    <Button class="font-medium ml-3" label="Annulla"
-                                        @click="handleAssociationCancel"></Button>
-                                </div>
+                            <div>
+                                <Button icon="pi pi-angle-left" label="Torna alla selezione delle date" link
+                                    @click="(e) => { _selectedEventId = null; prevCallback(e); }" />
                             </div>
-                            <!-- Evento -->
-                            <div v-if="!_isAssociated"
-                                class="p-card p-component border-round-2xl p-3 shadow-none border-1 surface-border shadow-1">
-                                <div class="flex align-items-center justify-content-start py-2">
-                                    <div class="w-3 white-space-nowrap"><i class="pi pi-calendar mr-1"></i> Data</div>
-                                    <div class="flex gap-3 font-medium text-lg">
-                                        {{ _computedSelectedEvent?.formatted_date }}
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Timeslots -->
-                            <div v-if="!_isAssociated"
-                                class="p-card p-component border-round-2xl p-3 shadow-none border-1 surface-border  shadow-1">
-                                <div class="flex align-items-center justify-content-start">
-                                    <div class="w-3 white-space-nowrap"><i class="pi pi-clock mr-1"></i> Orario</div>
-                                    <div>
-                                        <div class="flex gap-3">
-                                            <div v-for="(ts, index) in _availableTimeslots" :key="index">
-                                                <Button :label="ts.name" @click="_selectedTimeslotId = ts.id"
-                                                    :outlined="_selectedTimeslotId !== ts.id" />
-                                            </div>
-                                        </div>
-                                        <div class="text-sm py-2 -mb-3 text-500">Gli orari hanno il solo scopo di
-                                            regolare i
-                                            flussi di
-                                            accesso. Il posto si
-                                            considera prenotato per l’intera durata della serata</div>
-                                    </div>
-                                </div>
-                            </div>
-
-
-
                             <div class="p-card p-component border-round-2xl p-3 shadow-none border-1 surface-border shadow-1"
                                 v-if="_availableOptions.length > 0">
                                 <BookingSeatingPlanImage />
-                                <div class="flex flex-column md:flex-row gap-3">
+                                <div
+                                    class="flex flex-column md:flex-row gap-3 align-items-center justify-center justify-items-center">
                                     <div v-for="(item, index) in _availableOptions" :key="index"
-                                        class="md:w-6 w-full p-card p-component border-1 surface-border relative"
+                                        class="md:w-6 w-full p-card p-component border-1 surface-border relative mx-auto"
                                         :class="`${_selectedOptionId === item?.id ? 'shadow-3 bg-gray-200' : 'shadow-none'}`">
                                         <div v-if="item.available_pax === 0"
                                             class="absolute text-red bottom-0	 font-bold -mt-2 w-full"
@@ -515,9 +407,9 @@ function handleExpiration() {
                                                 SOLD
                                                 OUT</div>
                                         </div>
-                                        <BlockUI :blocked="item.available_pax === 0">
-                                            <div class="flex flex-column sm:align-items-center p-4 gap-3 w-full">
-
+                                        <BlockUI>
+                                            <div
+                                                class="flex flex-column align-items-center justify-center p-4 gap-3 w-full my-auto">
                                                 <div class="text-lg uppercase text-500 text-center">
                                                     {{ item.type_display }}
                                                 </div>
@@ -525,140 +417,36 @@ function handleExpiration() {
                                                     {{ item.section_display }}
                                                 </div>
                                                 <div class="flex flex-column gap-3 pt-4 text-center">
-                                                    <div class="text-center">
-                                                        <span class="pi pi-user mr-1"></span> Posto a sedere riservato
+                                                    <div class="font-medium text-center">
+                                                        <span class="pi pi-bolt mr-1"></span> Ingresso prioritario al
+                                                        Biergarten
                                                     </div>
                                                     <div class="font-medium text-center">
-                                                        <span class="pi pi-bolt mr-1"></span> Ingresso prioritario
-                                                    </div>
-                                                    <div class="text-center pt-5">
-                                                        <span class="pi pi-euro mr-1"></span> Valore
-                                                        spendibile<span class="text-red-500">*</span>
-                                                        <!-- <div v-html="item?.min_consumption?.description_html" /> -->
+                                                        <span class="pi pi-euro mr-1"></span> Token del valore di {{
+                                                            item?.min_consumption?.price * 1 }} €
                                                     </div>
                                                 </div>
                                                 <div class="text-center pt-1">
-                                                    <div class="text-6xl font-medium text-900 text-center">
+                                                    <div class="text-6xl font-medium text-900 text-center mt-4">
                                                         € {{ item?.min_consumption?.price * 1 }}
                                                     </div>
                                                     <div class="text-sm text-500 -mt-1">
                                                         +{{ item.fees_amount * 1 }}€ di commissioni
                                                     </div>
-                                                    <div class="text-sm text-700 block mt-1 text-center">a
-                                                        persona
-                                                    </div>
                                                 </div>
-                                                <div class="text-center-4rem mt-4" v-if="!_isAssociated">
-                                                    <!-- <RadioButton v-model="_selectedOptionId" inputId="option" name="option"
-                                                    active :value="item?.id" @click="() => {
-                                                        _selectedOptionId = item?.id;
-                                                        _selectedProductId = item?.min_consumption?.id;
-                                                    }" /> -->
-                                                    <Button label="Seleziona" size="large" class="w-full md:w-auto"
-                                                        :outlined="_selectedOptionId !== item?.id" @click="() => {
+                                                <div class="text-center-4rem mt-4">
+                                                    <Button :label="_buttonLabel" size="large" class="w-full md:w-auto"
+                                                        :outlined="_selectedOptionId !== item?.id" @click="async () => {
                                                             _selectedOptionId = item?.id;
                                                             _selectedProductId = item?.min_consumption?.id;
-                                                        }" :disabled="item.available_pax === 0" />
-                                                </div>
-                                                <div v-if="item.available_pax <= 100 && item.available_pax > 0" class="text-center -mb-2 mt-2 text-red-500
- font-bold">
-                                                    <i class="pi pi-exclamation-circle"></i>
-                                                    Ancora pochi posti!
+                                                            addToCart(nextCallback);
+                                                        }" :disabled="!item.is_active" />
                                                 </div>
                                             </div>
                                         </BlockUI>
                                     </div>
                                 </div>
-                                <!-- <div class="grid grid-nogutter">
-                                    <div v-for="(item, index) in _availableOptions" :key="index" class="col-12">
-                                        <div class="flex flex-column sm:flex-row sm:align-items-center p-4 gap-3"
-                                            :class="{ 'border-top-1 surface-border': index !== 0 }">
-                                            <div class="font-medium text-lg uppercase w-14rem">
-                                                {{ item.section_display }}
-                                            </div>
-                                            <div class="flex-grow-1">
-                                                Include:
-                                                <div v-html="item?.min_consumption?.description_html" />
-                                            </div>
-                                            <div class="text-right">
-                                                <div class="text-xl font-medium text-900">
-                                                    € {{ item?.min_consumption?.price }}
-                                                </div>
-                                                <div class="text-xs text-500 -mt-1">
-                                                    +{{ item.fees_amount }}€ di commissioni
-                                                </div>
-                                                <div class="text-sm text-700 block mt-1">a
-                                                    persona
-                                                </div>
-                                            </div>
-                                            <div class="text-right w-4rem" v-if="!_isAssociated">
-                                                <RadioButton v-model="_selectedOptionId" inputId="option" name="option"
-                                                    active :value="item?.id" @click="() => {
-                                                        _selectedOptionId = item?.id;
-                                                        _selectedProductId = item?.min_consumption?.id;
-                                                    }" />
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div> -->
                             </div>
-
-                            <!-- Persone -->
-                            <template v-if="_isAssociated && _computedSelectedOption && _computedAvailableSeats <= 0">
-                                <div
-                                    class="p-card p-component border-round-2xl p-3 shadow-none border-1 surface-border shadow-1">
-                                    <div class="text-red-600 text-xl font-bold text-center">
-                                        <i class="pi pi-exclamation-triangle mr-2"></i>
-                                        Non ci sono più posti disponibili per l'area selezionata.
-                                    </div>
-                                </div>
-                            </template>
-                            <template v-else>
-                                <div class="p-card p-component border-round-2xl p-3 shadow-none border-1 surface-border shadow-1"
-                                    v-if="_selectedOptionId">
-                                    <div class="flex flex-column md:flex-row align-items-center justify-content-start">
-                                        <div
-                                            class="md:w-3 w-full md:text-left text-center p-2 md:p-0 white-space-nowrap">
-                                            <i class="pi pi-users mr-1"></i>In quanti siete?
-                                        </div>
-                                        <div class="flex gap-3 w-full">
-                                            <BookingHorizontalPeoplePicker v-model:adults="_adultsCount"
-                                                v-model:children="_childredCount" v-model:infants="_infantsCount"
-                                                :maxInfants="_maxInfants" :hide-children="true"
-                                                :max="_computedAvailableSeats" class="w-full" />
-                                            <!-- <BookingSeatPicker /> -->
-                                        </div>
-                                    </div>
-                                    <Message severity="error"
-                                        v-if="_computedSelectedOption && (_computedTotalGuests > _computedAvailableSeats)">
-                                        Hai
-                                        superato il numero di posti di disponibili per l'area
-                                        selezionata. Riduci il numero di persone per proseguire.</Message>
-                                </div>
-                                <div class="flex justify-content-start mt-2 px-2 pb-2"
-                                    v-if="_availableOptions.length > 0">
-                                    <div class="text-sm text-500">
-                                        <span class="text-red-500">*</span>
-                                        Il prezzo indicato è il valore minimo di consumo per ogni persona. I coupon
-                                        valore
-                                        sono spendibili per food, beverage (esclusi bretzel) e gadgets. Eventuale
-                                        credito
-                                        residuo potrà essere speso in altre date dell’evento, ma non garantisce accesso
-                                        né
-                                        posto a sedere.
-                                    </div>
-                                </div>
-                                <!-- Actions -->
-                                <div class="pt-4" v-if="_selectedOptionId">
-                                    <div class="flex align-items-center justify-content-end">
-                                        <Button
-                                            :disabled="loading || !_computedSelectedProduct || _computedTotalGuests < 1 || _computedTotalGuests > _computedAvailableSeats"
-                                            :loading="loading" :pt="{ label: { class: 'font-normal text-xl' } }"
-                                            :label="_buttonLabel" @click="() => addToCart(nextCallback)"
-                                            class="w-full md:w-auto" />
-                                    </div>
-                                </div>
-                            </template>
                         </div>
                     </template>
                 </StepperPanel>
@@ -683,31 +471,19 @@ function handleExpiration() {
                                                 </p>
                                             </div>
 
-                                            <CustomerForm ref="customerFormRef">
+                                            <CustomerForm ref="customerFormRef" hideInvoice>
                                                 <template #terms>
                                                     <div
                                                         class="flex flex-column border-0 surface-border border-round-lg px-3 surface-ground text-primary text-sm font-light mt-2">
                                                         <p>
-                                                            Il documento che verrà generato è l’unico che certifichi
-                                                            l’avvenuta prenotazione e che ti consentirà di accedere
+                                                            Il biglietto che verrà generato è l’unico che certifichi
+                                                            l’avvenuto acquisto e che ti consentirà di accedere
                                                             all’Oktoberfest Calabria entrando dall’ingresso riservato ai
-                                                            prenotati.
+                                                            Saltafila.
                                                         </p>
                                                         <p>
-                                                            Una copia potrà essere consegnata solo ed esclusivamente
-                                                            agli altri componenti interessati a questa prenotazione,
-                                                            fino al raggiungimento di numero
-                                                            <strong>{{ _computedTotalGuests }}</strong> accessi totali.
-                                                            Eventuali ulteriori tentativi di accesso con il medesimo QR
-                                                            code saranno respinti.
-                                                        </p>
-                                                        <p>
-                                                            È prevista una tolleranza di massimo
-                                                            <strong>20 minuti</strong> dall'orario indicato (un ritardo
-                                                            oltre l’orario limite comporterà la perdita del diritto alla
-                                                            presente prenotazione. Rimane la possibilità di recuperare
-                                                            tale diritto nelle serate successive – previa disponibilità
-                                                            dei posti – contattando l’organizzazione.
+                                                            Eventuali ulteriori tentativi di accesso con il medesimo
+                                                            biglietto saranno respinti.
                                                         </p>
                                                     </div>
                                                 </template>
@@ -751,10 +527,6 @@ function handleExpiration() {
                                 </div>
                             </section>
                         </div>
-                        <!-- <div class="flex pt-4 justify-content-between">
-                            <Button label="Back" severity="secondary" icon="pi pi-arrow-left" @click="prevCallback" />
-                            <Button label="Next" icon="pi pi-arrow-right" iconPos="right" @click="nextCallback" />
-                        </div> -->
                     </template>
                 </StepperPanel>
             </Stepper>

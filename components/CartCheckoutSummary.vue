@@ -2,10 +2,12 @@
 interface Props {
   cart: any;
   hideFeeSummary?: boolean;
+  adultLabel?: string
 }
 
 const props = withDefaults(defineProps<Props>(), {
   hideFeeSummary: false,
+  adultLabel: "adulti e bambini (dai 6 anni in su)"
 });
 const toast = useToast();
 import { useToast } from "primevue/usetoast";
@@ -89,8 +91,8 @@ async function applyDiscountCode() {
             <div class="uppercase font-medium pb-2">{{ cart.option_type_display }} {{ cart.section_display }}</div>
             <div class="pb-1"><span class="pi pi-calendar pr-1"></span> {{ cart.event_display }}</div>
             <div class="pb-1">
-              <span class="pi pi-user pr-1"></span> <strong>{{ cart.adults }}</strong> adulti e bambini dai 6 anni in
-              su<span v-if="cart.children > 0">,
+              <span class="pi pi-user pr-1"></span> <strong>{{ cart.adults }}</strong> {{ adultLabel }}<span
+                v-if="cart.children > 0">,
                 {{
                   cart.children }}
                 bambini</span><span v-if="cart.infants > 0">, <strong>{{ cart.infants }}</strong> bambini piccoli fino a
