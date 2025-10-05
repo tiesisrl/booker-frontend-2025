@@ -498,7 +498,8 @@ function handleExpiration() {
                                                 <div>
                                                     <!-- <CheckoutSummary /> -->
                                                     <CartCheckoutSummary :cart="cartData" v-if="cartData"
-                                                        @remove-discount-code="removeDiscountCode" />
+                                                        @remove-discount-code="removeDiscountCode"
+                                                        adultLabel="ingresso" />
                                                 </div>
                                                 <div class="pt-3">
                                                     <Button :disabled="loading" :loading="loading"
