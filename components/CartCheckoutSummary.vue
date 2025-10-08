@@ -2,10 +2,12 @@
 interface Props {
   cart: any;
   hideFeeSummary?: boolean;
+  adultLabel?: string
 }
 
 const props = withDefaults(defineProps<Props>(), {
   hideFeeSummary: false,
+  adultLabel: "adulti e bambini (dai 6 anni in su)"
 });
 const toast = useToast();
 import { useToast } from "primevue/usetoast";
@@ -14,60 +16,6 @@ const { hideFeeSummary, cart } = toRefs(props);
 const loading = ref(false);
 
 defineEmits(['removeDiscountCode'])
-
-async function applyDiscountCode() {
-  try {
-    loading.value = true;
-
-    if (!discountCode.value) return;
-    if (discountCode.value.length < 3) return;
-
-    const cartId = localStorage.getItem("CartID") || "";
-
-    const response = await $fetch(`http://localhost:8000/api/v1/shop/cart/${cartId}/apply-discount/`, {
-      // baseURL: "http://localhost:8000/api/v1",
-      method: "POST",
-      headers: {
-        // "Optional-Forward-Content": "32tsEFrE3boTkO",
-        // "X-App-ID": "BOOKTA"
-        "X-Cart-ID": localStorage.getItem("CartID") || ""
-      },
-      body: {
-        code: discountCode.value?.trim()
-      },
-    });
-
-    // console.log("response", response);
-
-    cart.value = {
-      ...cart.value,
-      ...response,
-    }
-
-    toast.add({
-      severity: "success",
-      detail: response?.detail || "Codice applicato!",
-      // summary: "summary",
-      life: 4000,
-    });
-
-
-  } catch (error) {
-    console.error(error);
-    toast.add({
-      severity: "error",
-      detail:
-        error?.data?.detail ||
-        error?.data?.message ||
-        error?.message ||
-        "Ops! Qualcosa è andato storto! Riprova.",
-      summary: "Errore",
-      life: 4000,
-    });
-  } finally {
-    loading.value = false;
-  }
-}
 
 
 </script>
@@ -89,8 +37,8 @@ async function applyDiscountCode() {
             <div class="uppercase font-medium pb-2">{{ cart.option_type_display }} {{ cart.section_display }}</div>
             <div class="pb-1"><span class="pi pi-calendar pr-1"></span> {{ cart.event_display }}</div>
             <div class="pb-1">
-              <span class="pi pi-user pr-1"></span> <strong>{{ cart.adults }}</strong> adulti e bambini dai 6 anni in
-              su<span v-if="cart.children > 0">,
+              <span class="pi pi-user pr-1"></span> <strong>{{ cart.adults }}</strong> {{ adultLabel }}<span
+                v-if="cart.children > 0">,
                 {{
                   cart.children }}
                 bambini</span><span v-if="cart.infants > 0">, <strong>{{ cart.infants }}</strong> bambini piccoli fino a
