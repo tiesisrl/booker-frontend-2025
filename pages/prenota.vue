@@ -457,7 +457,7 @@ function handleExpiration() {
                                 <div class="flex align-items-center justify-content-start py-2">
                                     Ti stai associando alla prenotazione per &nbsp;<b>{{
                                         _associationData?.event_date
-                                    }},
+                                        }},
                                         {{
                                             _associationData?.timeslot }} – {{ _associationData?.area_name }}</b>&nbsp;
                                     di&nbsp;
@@ -507,7 +507,7 @@ function handleExpiration() {
                                     <div v-for="(item, index) in _availableOptions" :key="index"
                                         class="md:w-6 w-full p-card p-component border-1 surface-border relative"
                                         :class="`${_selectedOptionId === item?.id ? 'shadow-3 bg-gray-200' : 'shadow-none'}`">
-                                        <div v-if="item.available_pax === 0"
+                                        <div v-if="item.available_pax === 0 || item.flag === 'SOLD_OUT'"
                                             class="absolute text-red bottom-0	 font-bold -mt-2 w-full"
                                             style="z-index: 1200 !important;">
                                             <div
@@ -515,7 +515,7 @@ function handleExpiration() {
                                                 SOLD
                                                 OUT</div>
                                         </div>
-                                        <BlockUI :blocked="item.available_pax === 0">
+                                        <BlockUI :blocked="item.available_pax === 0 || item.flag === 'SOLD_OUT'">
                                             <div class="flex flex-column sm:align-items-center p-4 gap-3 w-full">
 
                                                 <div class="text-lg uppercase text-500 text-center">
