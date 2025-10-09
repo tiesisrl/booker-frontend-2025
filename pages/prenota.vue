@@ -432,9 +432,10 @@ function handleExpiration() {
                             <i class="pi pi-user-plus ml-2 mr-3" style="font-size: 2.1rem"></i> <span class="pt-2">Hai
                                 uno
                                 codice associazione?</span>
-                            <!-- <Button label="Clicca qui" :pt="bookTypeButtonPT" @click="showAssociateDialog = true;" link
-                                class="p-1 text-xl mt-2" :disabled /> -->
-                            <div class="text-red-500 pt-2">
+                            <Button label="Clicca qui" :pt="bookTypeButtonPT" @click="showAssociateDialog = true;" link
+                                class="p-1 text-xl mt-2" />
+
+                            <div class="text-red-500 pt-2" v-if="false">
                                 Associazione <u>temporanemente</u> sospesa per problemi tecnici, riprova più tardi. Ci
                                 scusiamo per il disagio.
                             </div>
