@@ -432,9 +432,16 @@ function handleExpiration() {
                             <i class="pi pi-user-plus ml-2 mr-3" style="font-size: 2.1rem"></i> <span class="pt-2">Hai
                                 uno
                                 codice associazione?</span>
-                            <Button label="Clicca qui" :pt="bookTypeButtonPT" @click="showAssociateDialog = true;" link
-                                class="p-1 text-xl mt-2" />
+                            <!-- <Button label="Clicca qui" :pt="bookTypeButtonPT" @click="showAssociateDialog = true;" link
+                                class="p-1 text-xl mt-2" :disabled /> -->
+                            <div class="text-red-500 pt-2">
+                                Associazione <u>temporanemente</u> sospesa per problemi tecnici, riprova più tardi. Ci
+                                scusiamo per il disagio.
+                            </div>
                         </div>
+                        <div>
+                        </div>
+
                     </div>
                     <div class="grid gap-2">
                         <div v-for="(event, index) in _availableEvents" :key="index" class="w-full">
@@ -457,7 +464,7 @@ function handleExpiration() {
                                 <div class="flex align-items-center justify-content-start py-2">
                                     Ti stai associando alla prenotazione per &nbsp;<b>{{
                                         _associationData?.event_date
-                                        }},
+                                    }},
                                         {{
                                             _associationData?.timeslot }} – {{ _associationData?.area_name }}</b>&nbsp;
                                     di&nbsp;
