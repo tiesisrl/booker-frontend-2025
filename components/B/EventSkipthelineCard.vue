@@ -28,15 +28,13 @@ const imageUrl = ref("https://oktoberfestcalabria.com/wp-content/uploads/element
                         <span class="font-medium text-secondary text-800 text-xl">{{ event.formatted_date }}</span>
 
                         <div class="text-lg font-medium mt-1 text-600 mt-2">
-                            <div class="font-normal"><i class="pi pi-clock pr-1"></i> Ingresso {{
+                            <div class="font-normal"><i class="pi pi-clock pr-1"></i> Ingresso dalle {{
                                 event.shift.start_time?.substring(0, 5) }}</div>
                             <!-- <div class="font-normal">Spettacolo live</div> -->
                         </div>
                     </div>
                     <div class="flex-grow-1 mt-3 p-0">
                         <div v-html="event.description_html" class="p-0 m-0"></div>
-                    </div>
-                    <div>
                     </div>
                 </div>
                 <div class="flex flex-row align-items-end gap-5 h-7rem">
