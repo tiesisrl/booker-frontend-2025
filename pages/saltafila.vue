@@ -376,8 +376,7 @@ function handleExpiration() {
                 <StepperPanel #content="{ nextCallback }">
                     <div class="grid gap-2">
                         <div v-for="(event, index) in _availableActiveEvents" :key="index" class="w-full">
-                            <!-- <pre>{{ event }}</pre> -->
-                            <BEventSkipthelineCard :event="event" list button-label="Salta la fila" @clicked="{
+                            <BEventSkipthelineCard :event="event" list button-label="Acquista" @clicked="{
                                 _selectedEventId = event?.id;
                                 nextCallback(event);
                             }" />
@@ -417,13 +416,7 @@ function handleExpiration() {
                                                     {{ item.section_display }}
                                                 </div>
                                                 <div class="flex flex-column gap-3 pt-4 text-center">
-                                                    <div class="font-medium text-center">
-                                                        <span class="pi pi-bolt mr-1"></span> Ingresso prioritario al
-                                                        Biergarten
-                                                    </div>
-                                                    <div class="font-medium text-center">
-                                                        <span class="pi pi-euro mr-1"></span> Token del valore di {{
-                                                            item?.min_consumption?.price * 1 }} €
+                                                    <div v-html="item.description_html">
                                                     </div>
                                                 </div>
                                                 <div class="text-center pt-1">
