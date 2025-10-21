@@ -691,7 +691,7 @@ function handleExpiration() {
                                                 </p>
                                             </div>
 
-                                            <CustomerForm ref="customerFormRef">
+                                            <CustomerForm ref="customerFormRef" hide-invoice>
                                                 <template #terms>
                                                     <div
                                                         class="flex flex-column border-0 surface-border border-round-lg px-3 surface-ground text-primary text-sm font-light mt-2">
