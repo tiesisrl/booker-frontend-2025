@@ -433,9 +433,9 @@ function handleExpiration() {
                                 uno
                                 codice associazione?</span>
                             <Button label="Clicca qui" :pt="bookTypeButtonPT" @click="showAssociateDialog = true;" link
-                                class="p-1 text-xl mt-2" />
+                                class="p-1 text-xl mt-2" :disabled="true" />
 
-                            <div class="text-red-500 pt-2" v-if="false">
+                            <div class="text-red-500 pt-2" v-if="true">
                                 Associazione <u>temporanemente</u> sospesa per problemi tecnici, riprova più tardi. Ci
                                 scusiamo per il disagio.
                             </div>
