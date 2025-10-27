@@ -433,9 +433,9 @@ function handleExpiration() {
                                 uno
                                 codice associazione?</span>
                             <Button label="Clicca qui" :pt="bookTypeButtonPT" @click="showAssociateDialog = true;" link
-                                class="p-1 text-xl mt-2" :disabled="true" />
+                                class="p-1 text-xl mt-2" :disabled="false" />
 
-                            <div class="text-red-500 pt-2" v-if="true">
+                            <div class="text-red-500 pt-2" v-if="false">
                                 Associazione <u>temporanemente</u> sospesa per problemi tecnici, riprova più tardi. Ci
                                 scusiamo per il disagio.
                             </div>
@@ -465,7 +465,7 @@ function handleExpiration() {
                                 <div class="flex align-items-center justify-content-start py-2">
                                     Ti stai associando alla prenotazione per &nbsp;<b>{{
                                         _associationData?.event_date
-                                    }},
+                                        }},
                                         {{
                                             _associationData?.timeslot }} – {{ _associationData?.area_name }}</b>&nbsp;
                                     di&nbsp;
